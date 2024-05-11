@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-do List</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+
+        .todo-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #e6e6e6;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff69b4;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: calc(70% - 10px);
+            border: 1px solid #ff69b4;
+            border-radius: 5px;
+            color: #333;
+        }
+
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ff69b4;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d83a87;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e6e6e6;
+            background-color: #fafafa;
+            transition: background-color 0.3s ease;
+        }
+
+        li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            margin-left: 10px;
+            color: #333;
+        }
+
+        .completed .task-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .due-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .delete-button {
+            background-color: transparent;
+            color: #ff69b4;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        
+input[type="date"] {
+    padding: 10px;
+    width: calc(30% - 10px); 
+    border: 1px solid #ff69b4;
+    border-radius: 5px;
+    color: #333;
+}
+
+input[type="date"]::placeholder {
+    color: #999;
+}
+input[type="date"] {
+            padding: 10px;
+            width: calc(30% - 10px); 
+            border: 1px solid #ff69b4; 
+            border-radius: 5px;
+            color: #333;
+        }
+
+        input[type="date"]::placeholder {
+            color: #999;
+        }
+
+        
+        input[type="checkbox"] {
+            appearance: none; 
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff69b4; 
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #ff69b4; 
+            border-color: #ff69b4; 
+        }
+
+        
+        input[type="checkbox"]:checked::before {
+            content: "\2713"; 
+            display: block;
+            text-align: center;
+            line-height: 18px;
+            color: #fff; 
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-container">
+        <h1>To-do List</h1>
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Enter task">
+            <input type="date" id="dueDateInput">
+            <button onclick="addTask()">Add</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+       
+        document.addEventListener('DOMContentLoaded', function() {  // loads tasks from local storage when the page loads
+            loadTasks(); // loads tasks from local storage when the page loads
+        });
+
+        
+        function addTask() { // adds a new task
+            var input = document.getElementById("taskInput");
+            var dueDateInput = document.getElementById("dueDateInput");
+            var task = input.value.trim();
+            var dueDate = dueDateInput.value.trim();
+            if (task !== "") {
+                var ul = document.getElementById("taskList");
+                var li = document.createElement("li");
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" onclick="toggleTaskCompletion(this)">
+                        <span class="task-text">${task}</span>
+                        <span class="due-date">${dueDate}</span>
+                    </div>
+                    <div>
+                        <button class="edit-button" onclick="editTask(this)">Edit</button>
+                        <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                    </div>
+                `;
+                ul.appendChild(li); // adds the new task to the task list
+                saveTasks(); // saves tasks to local storage
+                input.value = ""; // clear input field
+                dueDateInput.value = ""; // clear due date input field
+            }
+        }
+
+       
+        function toggleTaskCompletion(checkbox) {   // to toggle task completion
+            var taskSpan = checkbox.nextElementSibling;
+            taskSpan.classList.toggle("completed");
+            saveTasks(); // saves tasks to local storage
+        }
+
+       
+        function deleteTask(button) {   // to delete a task
+            var li = button.parentElement.parentElement;
+            li.remove(); // removes the task from the task list
+            saveTasks(); // saves tasks to local storage
+        }
+
+       
+        function editTask(button) {   // to edit a task
+            var li = button.parentElement.parentElement;
+            var taskTextSpan = li.querySelector(".task-text");
+            var newTaskText = prompt("Edit Task", taskTextSpan.textContent);
+            if (newTaskText !== null) {
+                taskTextSpan.textContent = newTaskText; // updates the task text
+                saveTasks(); // Save tasks to local storage
+            }
+        }
+
+        // Function to save tasks to local storage
+        function saveTasks() {
+            var tasks = [];
+            var taskElements = document.querySelectorAll("#taskList li");
+            taskElements.forEach(function(taskElement) {
+                var taskText = taskElement.querySelector(".task-text").textContent;
+                var dueDate = taskElement.querySelector(".due-date").textContent;
+                var isCompleted = taskElement.querySelector(".task-text").classList.contains("completed");
+                tasks.push({ text: taskText, dueDate: dueDate, completed: isCompleted });
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasks)); // Converts tasks to JSON and store in local storage
+        }
+
+        
+        function loadTasks() {  // load tasks from local storage
+            var tasks = JSON.parse(localStorage.getItem("tasks")) || []; // retrieves tasks from local storage
+            var ul = document.getElementById("taskList");
+            tasks.forEach(function(task) {
+                var li = document.createElement("li");
+                
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTaskCompletion(this)">
+                        <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+                        <span class="due-date">${task.dueDate}</span>
+                    </div>
+                    <div>
+                        <button class="edit-button" onclick="editTask(this)">Edit</button>
+                        <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                    </div>
+                `;
+                ul.appendChild(li); // adds the task to the task list
+            });
+        }
+    </script>
+</body>
+</html>
